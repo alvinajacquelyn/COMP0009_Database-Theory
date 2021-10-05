@@ -1,0 +1,141 @@
+1. What is the total number of shovels that have been ordered?
+
+SELECT *
+FROM orders
+INNER JOIN lineitems ON orders.orderID = lineitems.orderID
+INNER JOIN items ON items.itemID = lineitems.itemID
+WHERE description = 'Shovel'
+
+Ans :1
+
+2. For each customer who placed an order (ie, distinct order number),
+how many orders did they place?
+
+SELECT custID, COUNT( * ) AS c
+FROM orders
+GROUP BY custID
+
+3. What are the customer ID and family name of customers who
+didn’t place any order?
+
+SELECT customers.custID AS "Customersid", familyname, orders.custID AS "CustomersidWithOrder"
+FROM customers
+LEFT JOIN orders ON orders.custID = customers.custID
+WHERE orders.custID IS NULL
+
+Customersid
+familyname
+CustomersidWithOrder
+10325
+Schultz
+NULL
+10329
+Mendoza
+NULL
+10338
+Howell
+NULL
+10408
+Cleaver
+NULL
+10419
+Sakahara
+NULL
+10429
+Angstrom
+NULL
+
+4. Which customers bought both a canoe and a paddle? 
+
+SELECT o.custID, i.description, o.orderID
+FROM orders AS o
+INNER JOIN lineitems AS li ON o.orderID = li.orderID
+INNER JOIN items AS i ON li.itemID = i.itemID
+WHERE description = 'Canoe'
+OR description = 'Paddle'
+
+Ans: None(??)
+
+5. How much money have the suppliers made? Given that some items
+are produced by multiple suppliers, and because of our
+database design we don’t know who supplied the particular item
+on an order - what are the maximum possible earnings of each
+supplier?
+
+SELECT supplieritems.supplierID , SUM(items.unitcost * items.stocklevel) as totalearnings
+FROM supplieritems 
+INNER JOIN items
+ON supplieritems.itemID = items.itemID
+GROUP BY supplieritems.supplierID
+
+supplierID
+totalearnings
+S1
+25395.24
+S2
+10845.51
+S3
+198.00
+
+6. What are the names and total spend of customers who made more
+than one order?
+
+SELECT c.firstname, c.familyname, c.custID, o.orderID, li.itemID, COUNT(li.quantity) as numberoforders, i.description, i.unitcost, SUM(i.unitcost * quantity) as totalspent
+FROM orders as o
+INNER JOIN customers as c
+ON c.custID = o.custID
+INNER JOIN lineitems as li
+ON li.orderID = o.orderID
+INNER JOIN items as i
+ON i.itemID = li.itemID
+GROUP BY c.firstname
+HAVING COUNT(li.quantity) >1
+
+SELECT c.firstname, c.familyname, SUM(i.unitcost * quantity) as totalspent
+FROM orders as o
+INNER JOIN customers as c
+ON c.custID = o.custID
+INNER JOIN lineitems as li
+ON li.orderID = o.orderID
+INNER JOIN items as i
+ON i.itemID = li.itemID
+GROUP BY c.firstname
+HAVING COUNT(li.quantity) >1
+
+firstname
+familyname
+totalspent
+Anthony
+Sanchez
+35.30
+Conrad
+Giles
+139.00
+Elroy
+Keller
+1281.68
+Isabela
+Moore
+1575.79
+John
+Gray
+936.17
+Kevin
+Smith
+95.24
+Leroy
+Brown
+720.88
+Mary Ann
+Howell
+281.72
+Shawn
+Dalton
+156.75
+
+7. How many orders were received from each state where there is a
+recorded customer?
+
+
+
+
