@@ -1,0 +1,121 @@
+1. What is the total number of shovels that have been ordered?
+
+SELECT COUNT( * ) AS count
+FROM lineitems
+WHERE itemID = (
+SELECT itemID
+FROM items
+WHERE description = 'Shovel' )
+
+count
+1
+
+2. For each customer who placed an order (ie, distinct order number),
+how many orders did they place?
+
+SELECT COUNT( orderID ) AS numberoforders, custID
+FROM orders
+GROUP BY custID
+
+numberoforders  custID
+6 10101
+5 10298
+2 10299
+1 10315
+3 10330
+1 10339
+2 10410
+1 10413
+3 10438
+2 10439
+6 10449
+
+
+3. What are the customer ID and family name of customers who
+didn’t place any order?
+
+SELECT c.custID, c.familyname, o.orderID
+FROM customers AS c
+LEFT JOIN orders AS o ON c.custID = o.custID
+WHERE o.orderID IS NULL
+
+Customersid familyname  orderID
+10325 Schultz   NULL
+10329 Mendoza   NULL
+10338 Howell    NULL
+10408 Cleaver   NULL
+10419 Sakahara  NULL
+10429 Angstrom  NULL
+
+4. Which customers bought both a canoe and a paddle? 
+
+SELECT DISTINCT c.custID, c.firstname, c.familyname
+FROM customers AS c
+INNER JOIN orders AS o ON o.custID = c.custID
+INNER JOIN lineitems AS li ON o.orderID = li.orderID
+INNER JOIN items AS i ON li.itemID = i.itemID
+WHERE description = 'Canoe'
+OR description = 'Paddle'
+
+
+custID firstname familyname
+10449 Isabela Moore
+
+5. How much money have the suppliers made? Given that some items
+are produced by multiple suppliers, and because of our
+database design we don’t know who supplied the particular item
+on an order - what are the maximum possible earnings of each
+supplier?
+
+SELECT s.supplierID, SUM( i.unitcost * i.stocklevel ) AS maxearnings
+FROM supplieritems AS s
+INNER JOIN items AS i ON i.itemID = s.itemID
+GROUP BY s.supplierID
+
+supplierID maxearnings
+S1    25395.24
+S2    10845.51
+S3    198.00
+
+6. What are the names and total spend of customers who made more
+than one order?
+
+SELECT c.firstname, c.familyname, SUM( i.unitcost * li.quantity ) AS totalspent, COUNT( c.custID ) AS numberoforders
+FROM customers AS c
+INNER JOIN orders AS o ON c.custID = o.custID
+INNER JOIN lineitems AS li ON li.orderID = o.orderID
+INNER JOIN items AS i ON i.itemID = li.itemID
+GROUP BY c.custID
+HAVING COUNT( c.custID ) >1
+
+
+firstname familyname totalspent numberoforders
+John      Gray    936.17  8
+Leroy     Brown   720.88  7
+Elroy     Keller  1281.68 4
+Shawn     Dalton  156.75  3
+Anthony   Sanchez 35.30   3
+Mary Ann  Howell  281.72  2
+Kevin     Smith   95.24   3
+Conrad    Giles   139.00  2
+Isabela   Moore   1575.79 8
+
+7. How many orders were received from each state where there is a
+recorded customer?
+
+SELECT state, COUNT( custID ) AS numberoforders
+FROM customers
+GROUP BY state
+
+
+
+state   numberoforders
+Arizona         6
+Colorado        2
+Hawaii          1
+Idaho           1
+North Carolina  1
+Oregon          2
+South Carolina  1
+Washington      2
+Wisconsin       1
